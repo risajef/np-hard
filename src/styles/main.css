@@ -1,0 +1,10 @@
+/* Ordered imports preserve the shared layout and responsive cascade. */
+@import './base.css';
+@import './shell.css';
+@import './catalog.css';
+@import './game.css';
+@import './boards.css';
+@import './overlays.css';
+@import './responsive.css';
+@import './puzzle-details.css';
+@import './graph.css';

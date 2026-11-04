@@ -1,0 +1,54 @@
+.stats-row {
+  display: flex;
+  border: 1px solid #dee5d3;
+  background: #edf2e4;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  padding: 30px;
+  gap: 50px;
+}
+.stats-row strong {
+  font-family: Manrope, sans-serif;
+  font-size: 40px;
+  font-weight: 500;
+  display: block;
+  letter-spacing: -2px;
+}
+.stats-row span {
+  font-size: 11px;
+  color: #91a07f;
+  display: block;
+  margin-top: 7px;
+}
+.modal-shade {
+  position: fixed;
+  inset: 0;
+  background: #15251ccb;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  backdrop-filter: blur(4px);
+}
+.modal {
+  background: #fafbf5;
+  border: 1px solid #dce5ce;
+  border-radius: 15px;
+  padding: 35px;
+  max-width: 480px;
+  box-shadow: 0 25px 80px #0003;
+  max-height: 90vh;
+  overflow: auto;
+}
+.modal h2 {
+  font-size: 28px;
+  letter-spacing: -1px;
+}
+.modal p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #80906f;
+}
+.modal .primary {
+  margin-top: 12px;
+}

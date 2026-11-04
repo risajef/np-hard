@@ -1,0 +1,246 @@
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 246px;
+  background: #1e3029;
+  color: #adbbb0;
+  display: flex;
+  flex-direction: column;
+  padding: 35px 22px 0;
+  z-index: 20;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f0f3e9;
+  font-family: Manrope, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  margin-bottom: 47px;
+}
+.brand-light {
+  font-weight: 400;
+  margin-left: 3px;
+}
+.brand small {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #95a88e;
+  margin-top: 4px;
+}
+.brand-mark {
+  width: 39px;
+  height: 39px;
+  background: #d1e6a9;
+  color: #25392c;
+  border-radius: 11px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  letter-spacing: -2px;
+  transform: rotate(-4deg);
+}
+.brand-mark span {
+  transform: translateY(3px);
+}
+.nav-caption {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #839687;
+  font-weight: 600;
+  padding: 0 12px;
+  margin-bottom: 13px;
+}
+.nav-item {
+  background: transparent;
+  color: #aebcb1;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  margin: 3px 0;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.nav-item .icon {
+  height: 17px;
+  width: 17px;
+  opacity: 0.8;
+}
+.nav-item:hover {
+  background: #2c4035;
+  color: white;
+}
+.nav-item.active {
+  background: #d2e8ad;
+  color: #2f442f;
+  font-weight: 650;
+}
+.nav-count {
+  margin-left: auto;
+  font-size: 10px;
+  background: #34493b;
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+.active .nav-count {
+  background: #bed397;
+}
+.problem-caption {
+  margin-top: 33px;
+  display: flex;
+  justify-content: space-between;
+}
+.problems .nav-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 11px;
+}
+.nav-dot {
+  height: 5px;
+  width: 5px;
+  border-radius: 50%;
+  background: #c2dc99;
+  margin-left: auto;
+}
+.sidebar-note {
+  border: 1px solid #3b4b3c;
+  border-radius: 9px;
+  margin-top: auto;
+  padding: 16px 14px;
+  background: linear-gradient(130deg, #2c3f30, #23372d);
+  position: relative;
+  margin-bottom: 24px;
+}
+.sidebar-note strong {
+  display: block;
+  color: #d6dfcc;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.sidebar-note p {
+  font-size: 10px;
+  color: #90a48f;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.spark {
+  position: absolute;
+  right: 13px;
+  top: 12px;
+  color: #adc68a;
+  font-size: 27px;
+}
+.sidebar-bottom {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid #34483a;
+  margin: 0 -22px;
+  padding: 19px 22px;
+  font-size: 11px;
+  color: #dce3d5;
+}
+.sidebar-bottom small {
+  display: block;
+  color: #879b8a;
+  font-size: 9px;
+  margin-top: 3px;
+}
+.avatar {
+  width: 33px;
+  height: 33px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e9ecdf;
+  color: #6a7b5d;
+  font-size: 10px;
+  font-weight: 600;
+}
+.sidebar-bottom .avatar {
+  background: #43583f;
+  color: #d8e5c3;
+}
+.avatar.small {
+  width: 30px;
+  height: 30px;
+  font-size: 9px;
+}
+.online-dot {
+  width: 5px;
+  height: 5px;
+  background: #bed79b;
+  border-radius: 50%;
+  margin-left: auto;
+}
+.workspace {
+  margin-left: 246px;
+}
+.topbar {
+  height: 78px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 44px;
+  background: #fafbf7;
+}
+.breadcrumb {
+  font-size: 11px;
+  color: #8c9588;
+}
+.breadcrumb span {
+  margin: 0 12px;
+  color: #c1c7ba;
+}
+.breadcrumb strong {
+  font-weight: 500;
+  color: #465441;
+}
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.local-label {
+  font-size: 10px;
+  color: #879080;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.local-label i,
+.green-dot {
+  height: 5px;
+  width: 5px;
+  background: #859d62;
+  border-radius: 50%;
+  display: inline-block;
+}
+.icon-button {
+  background: none;
+  padding: 0;
+  color: #7f8c74;
+}
+.icon-button .icon {
+  height: 17px;
+  width: 17px;
+}
+main {
+  max-width: 1450px;
+  margin: auto;
+  padding: 44px 44px 36px;
+}

@@ -1,0 +1,39 @@
+/* Layout motion never changes the logical graph or its puzzle solution. */
+.live-graph-board .graph-node {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.live-graph-board .graph-node.is-dragging {
+  cursor: grabbing;
+}
+
+.live-graph-board .graph-node.is-dragging circle {
+  stroke: #6b8e46;
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 4px #263f2533);
+}
+
+.graph-viewport {
+  overflow-x: auto;
+}
+
+.graph-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .graph-viewport .game-svg {
+    min-width: 680px;
+    max-height: none;
+  }
+
+  .graph-scroll-hint {
+    display: block;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #64775d;
+  }
+}

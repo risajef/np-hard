@@ -1,0 +1,133 @@
+.knapsack-board,
+.job-board {
+  padding: 25px;
+  background: #f5f7ef;
+  min-height: 410px;
+}
+.board-label {
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: #8e9d7c;
+  margin-bottom: 17px;
+  display: flex;
+  justify-content: space-between;
+}
+.capacity > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.capacity span {
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #8b9a7d;
+}
+.capacity strong {
+  font-size: 25px;
+  font-weight: 500;
+}
+.capacity small {
+  font-size: 12px;
+  color: #91a080;
+}
+.danger {
+  color: #b3654c;
+}
+.job-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+.job-legend > div {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 9px;
+  color: #8a967d;
+}
+.job-legend span {
+  padding: 4px 6px;
+  border-radius: 3px;
+  color: #495540;
+}
+.machine-order {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+.machine-order > strong {
+  font-size: 10px;
+  color: #879779;
+}
+.op {
+  flex: 1;
+  border: 1px solid var(--op-color);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafbf4;
+}
+.op > span {
+  display: block;
+  padding: 8px;
+  background: var(--op-color);
+  font-size: 12px;
+}
+.op small {
+  font-size: 8px;
+  float: right;
+}
+.gantt {
+  margin-top: 25px;
+}
+.gantt-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.gantt-row > span {
+  font-size: 10px;
+  color: #839273;
+  width: 22px;
+}
+.gantt-row > div {
+  flex: 1;
+  height: 36px;
+  background: repeating-linear-gradient(
+    to right,
+    #e7ecdf 0,
+    #e7ecdf 1px,
+    transparent 1px,
+    transparent 10%
+  );
+  position: relative;
+}
+.gantt-row > div > div {
+  position: absolute;
+  top: 0;
+  height: 36px;
+  border-radius: 3px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f7f9f0;
+}
+.gantt-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 34px;
+  font-size: 8px;
+  color: #91a181;
+}
+.cycle-warning {
+  background: #f4e9db;
+  padding: 20px;
+  color: #a27954;
+  font-size: 11px;
+  line-height: 1.8;
+  border-radius: 6px;
+}
