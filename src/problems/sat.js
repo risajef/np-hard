@@ -1,3 +1,4 @@
+import { validMask } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 
 export class SatProblem extends Problem {
@@ -57,6 +58,7 @@ export class SatProblem extends Problem {
   }
 
   evaluate(puzzle, assignment) {
+    if (!validMask(assignment, puzzle.n)) return { valid: false, optimal: false, value: Infinity };
     const value = puzzle.clauses.filter((clause) => this.satisfied(clause, assignment)).length;
     const valid = value === puzzle.clauses.length;
     return { valid, optimal: valid, value };

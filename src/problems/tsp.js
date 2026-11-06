@@ -1,3 +1,4 @@
+import { validIndices } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { EPSILON, permutations } from '../core/combinatorics.js';
 
@@ -39,11 +40,9 @@ export class TspProblem extends Problem {
   }
 
   evaluate(puzzle, route) {
-    const valid =
-      Array.isArray(route) &&
-      route.length === puzzle.points.length &&
-      new Set(route).size === route.length &&
-      route.every((i) => Number.isInteger(i) && i >= 0 && i < puzzle.points.length);
+    const legal = validIndices(route, puzzle.points.length) && route.length <= puzzle.points.length;
+    if (!legal) return { valid: false, value: Infinity, optimal: false };
+    const valid = route.length === puzzle.points.length;
     const value = routeLength(puzzle.points, route);
     return { valid, value, optimal: valid && Math.abs(value - puzzle.best) < EPSILON };
   }

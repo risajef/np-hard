@@ -1,3 +1,4 @@
+import { validMask } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { EPSILON, solveSubsets } from '../core/combinatorics.js';
 
@@ -76,6 +77,8 @@ export class FacilityLocationProblem extends Problem {
   }
 
   evaluate(puzzle, mask) {
+    if (!validMask(mask, puzzle.facilities.length))
+      return { valid: false, optimal: false, value: Infinity };
     const value = this.cost(puzzle, mask);
     return { valid: mask !== 0, value, optimal: Math.abs(value - puzzle.best) < EPSILON };
   }

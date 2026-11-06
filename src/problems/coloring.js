@@ -85,11 +85,16 @@ export class ColoringProblem extends Problem {
 
   evaluate(puzzle, colors) {
     const valid =
+      Array.isArray(colors) &&
       colors.length === puzzle.points.length &&
       colors[0] === 0 &&
       colors[1] === 1 &&
-      colors.every((c) => [0, 1, 2].includes(c)) &&
+      Array.from(colors).every((c) => [0, 1, 2].includes(c)) &&
       puzzle.edges.every(([a, b]) => colors[a] !== colors[b]);
-    return { valid, optimal: valid, value: colors.filter((c) => c >= 0).length };
+    return {
+      valid,
+      optimal: valid,
+      value: Array.isArray(colors) ? colors.filter((c) => [0, 1, 2].includes(c)).length : 0,
+    };
   }
 }

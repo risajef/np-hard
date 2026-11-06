@@ -1,3 +1,4 @@
+import { validIndices } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { bitCount, coveredBy, greedyCover, solveCover, pruneCover } from '../core/combinatorics.js';
 
@@ -31,10 +32,8 @@ export class GridCoverProblem extends Problem {
 
   evaluate(puzzle, selected) {
     const count = puzzle.targets?.length ?? puzzle.points.length;
-    const unique = [...new Set(selected)];
-    const legal =
-      unique.length === selected.length &&
-      unique.every((i) => Number.isInteger(i) && i >= 0 && i < puzzle.cover.length);
+    const legal = validIndices(selected, puzzle.cover.length);
+    const unique = legal ? selected : [];
     const cover = legal ? coveredBy(puzzle.cover, unique) : 0;
     const valid = legal && cover === (1 << count) - 1;
     return {

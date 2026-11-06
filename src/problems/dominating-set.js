@@ -1,3 +1,4 @@
+import { validMask } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { bitCount, solveCover, greedyCover, pruneCover } from '../core/combinatorics.js';
 import { springLayout } from '../core/graph.js';
@@ -73,6 +74,8 @@ export class DominatingSetProblem extends Problem {
   }
 
   evaluate(puzzle, mask) {
+    if (!validMask(mask, puzzle.points.length))
+      return { valid: false, optimal: false, value: Infinity };
     const cover = puzzle.cover.reduce((value, c, i) => (mask & (1 << i) ? value | c : value), 0);
     const total = puzzle.points.length;
     const valid = cover === (1 << total) - 1;

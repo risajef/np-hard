@@ -1,3 +1,4 @@
+import { validMask } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { solveSubsets } from '../core/combinatorics.js';
 
@@ -77,6 +78,8 @@ export class KnapsackProblem extends Problem {
   }
 
   evaluate(puzzle, mask) {
+    if (!validMask(mask, puzzle.items.length))
+      return { valid: false, optimal: false, value: Infinity };
     const { weight, value } = this.totals(puzzle, mask);
     const valid = weight <= puzzle.capacity;
     return { valid, weight, value, optimal: valid && value === -puzzle.best };

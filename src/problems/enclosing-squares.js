@@ -1,3 +1,4 @@
+import { validIndices } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { countBits, coverageMasks, coverageUnion, solvePacking } from '../core/packing-cover.js';
 import { analyzeSquareCloud } from '../core/square-cloud-quality.js';
@@ -173,10 +174,7 @@ export class EnclosingSquaresProblem extends Problem {
   }
 
   evaluate(puzzle, state) {
-    const unique = [...new Set(state)];
-    const legal =
-      unique.length === state.length &&
-      unique.every((i) => Number.isInteger(i) && i >= 0 && i < puzzle.squares.length);
+    const legal = validIndices(state, puzzle.squares.length);
     const coveredPoints = Array(puzzle.points.length).fill(false);
     if (legal)
       for (const index of state)
@@ -195,7 +193,7 @@ export class EnclosingSquaresProblem extends Problem {
     return {
       valid,
       optimal: valid && state.length === puzzle.best,
-      value: state.length,
+      value: legal ? state.length : Infinity,
       overlapping,
       coveredPoints,
       covered,

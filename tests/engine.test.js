@@ -194,6 +194,10 @@ test('TSP rejects duplicate cities and job schedules reject precedence cycles', 
   const puzzle = generate('tsp', 42);
   assert.equal(evaluate(puzzle, Array(puzzle.points.length).fill(0)).valid, false);
   const job = {
+    machines: [
+      [1, 2],
+      [3, 0],
+    ],
     ops: Array.from({ length: 4 }, () => ({ duration: 2 })),
     jobs: [
       [0, 1],

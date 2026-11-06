@@ -1,9 +1,22 @@
+import { validIndices } from '../core/state-validation.js';
 import { Problem } from './problem.js';
 import { permutations } from '../core/combinatorics.js';
 
 /** Earliest-start schedule for job precedence and the chosen machine orders. */
 export function jobSchedule(puzzle, orders) {
   const count = puzzle.ops.length;
+  if (
+    !Array.isArray(orders) ||
+    orders.length !== puzzle.machines.length ||
+    !Array.from(orders).every(
+      (order, machine) =>
+        validIndices(order, count) &&
+        order.length === puzzle.machines[machine].length &&
+        order.every((index) => puzzle.machines[machine].includes(index)),
+    )
+  ) {
+    return { valid: false, start: Array(count).fill(0), makespan: Infinity };
+  }
   const edges = Array.from({ length: count }, () => new Set());
   const degree = Array(count).fill(0);
   for (const order of [...puzzle.jobs, ...orders]) {
@@ -67,6 +80,10 @@ export class JobShopProblem extends Problem {
 
   evaluate(puzzle, orders) {
     const result = jobSchedule(puzzle, orders);
-    return { ...result, value: result.makespan, optimal: result.makespan === puzzle.best };
+    return {
+      ...result,
+      value: result.makespan,
+      optimal: result.valid && result.makespan === puzzle.best,
+    };
   }
 }
