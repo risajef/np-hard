@@ -3,18 +3,20 @@ import { svgBoard } from './common.js';
 
 export function galleryBoard({ puzzle, state, evaluation }) {
   const { grid } = puzzle;
-  let drawing = html`
-    <rect
-      x="${grid.x}"
-      y="${grid.y}"
-      width="${grid.columns * grid.cell}"
-      height="${grid.rows * grid.cell}"
-      rx="3"
-      fill="#65725e"
-    />
-  `;
-  drawing += grid.floor
-    .map((index) => {
+  const drawing = [
+    html`
+      <rect
+        x="${grid.x}"
+        y="${grid.y}"
+        width="${grid.columns * grid.cell}"
+        height="${grid.rows * grid.cell}"
+        rx="3"
+        fill="#65725e"
+      />
+    `,
+  ];
+  drawing.push(
+    grid.floor.map((index) => {
       const x = grid.x + (index % grid.columns) * grid.cell;
       const y = grid.y + Math.floor(index / grid.columns) * grid.cell;
       return html`
@@ -28,12 +30,12 @@ export function galleryBoard({ puzzle, state, evaluation }) {
           stroke-width="1"
         />
       `;
-    })
-    .join('');
+    }),
+  );
   for (const index of state) {
     const guard = puzzle.guards[index];
-    drawing += puzzle.targets
-      .map((target, j) =>
+    drawing.push(
+      puzzle.targets.map((target, j) =>
         puzzle.cover[index] & (1 << j)
           ? html`
               <path
@@ -44,11 +46,11 @@ export function galleryBoard({ puzzle, state, evaluation }) {
               />
             `
           : '',
-      )
-      .join('');
+      ),
+    );
   }
-  drawing += puzzle.targets
-    .map(
+  drawing.push(
+    puzzle.targets.map(
       (target, i) => html`
         <path
           d="m${target.x} ${target.y - 5} 5 5-5 5-5-5Z"
@@ -56,10 +58,10 @@ export function galleryBoard({ puzzle, state, evaluation }) {
           pointer-events="none"
         />
       `,
-    )
-    .join('');
-  drawing += puzzle.guards
-    .map(
+    ),
+  );
+  drawing.push(
+    puzzle.guards.map(
       (guard, i) => html`
         <g
           class="svg-control grid-position"
@@ -94,8 +96,8 @@ export function galleryBoard({ puzzle, state, evaluation }) {
           }
         </g>
       `,
-    )
-    .join('');
+    ),
+  );
   return svgBoard(
     puzzle,
     drawing,

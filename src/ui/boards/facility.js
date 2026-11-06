@@ -2,7 +2,7 @@ import { html } from '../html.js';
 import { label, svgBoard } from './common.js';
 
 export function facilityBoard({ puzzle, state }) {
-  let drawing = '';
+  const drawing = [];
   puzzle.clients.forEach((client, j) => {
     const nearest = puzzle.facilities.reduce(
       (best, _, i) =>
@@ -10,20 +10,20 @@ export function facilityBoard({ puzzle, state }) {
       -1,
     );
     if (nearest >= 0)
-      drawing += html`
+      drawing.push(html`
         <path
           d="M${client.x},${client.y} ${puzzle.facilities[nearest].x},${puzzle.facilities[nearest].y}"
           stroke="#b3c4a5"
           stroke-dasharray="4 4"
         />
-      `;
-    drawing += html`
+      `);
+    drawing.push(html`
       <circle cx="${client.x}" cy="${client.y}" r="6" fill="#b7a98f" />
       <text x="${client.x + 10}" y="${client.y + 4}" font-size="11" fill="#827764">K${j + 1}</text>
-    `;
+    `);
   });
-  drawing += puzzle.facilities
-    .map(
+  drawing.push(
+    puzzle.facilities.map(
       (site, i) => html`
         <g
           class="svg-control"
@@ -56,7 +56,7 @@ export function facilityBoard({ puzzle, state }) {
           </text>
         </g>
       `,
-    )
-    .join('');
+    ),
+  );
   return svgBoard(puzzle, drawing, '■ Standort · ● Kunde');
 }

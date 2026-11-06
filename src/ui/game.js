@@ -120,21 +120,19 @@ export function renderGame({
             ? html`
                 <div class="palette">
                   Deine Farbe
-                  ${['Koralle', 'Blau', 'Grün']
-                    .map(
-                      (c, i) => html`
-                        <button
-                          data-color="${i}"
-                          class="${color === i ? 'chosen' : ''}"
-                          style="background:${['#e2a197', '#8eb9d7', '#b6c982'][i]}"
-                          aria-label="${c}"
-                          aria-pressed="${color === i}"
-                        >
-                          ${color === i ? '✓' : ''}
-                        </button>
-                      `,
-                    )
-                    .join('')}
+                  ${['Koralle', 'Blau', 'Grün'].map(
+                    (c, i) => html`
+                      <button
+                        data-color="${i}"
+                        class="${color === i ? 'chosen' : ''}"
+                        style="background:${['#e2a197', '#8eb9d7', '#b6c982'][i]}"
+                        aria-label="${c}"
+                        aria-pressed="${color === i}"
+                      >
+                        ${color === i ? '✓' : ''}
+                      </button>
+                    `,
+                  )}
                 </div>
               `
             : ''
@@ -170,9 +168,13 @@ export function renderGame({
                       <small>/ ${p.points.length}</small>
                     `
                   : p.id === 'facility'
-                    ? '<small> €</small>'
+                    ? html`
+                        <small>€</small>
+                      `
                     : p.id === 'job'
-                      ? '<small> ZE</small>'
+                      ? html`
+                          <small>ZE</small>
+                        `
                       : ''
             }
           </strong>
@@ -206,7 +208,9 @@ export function renderGame({
             ? html`
                 <div class="feedback ${message.type}" role="status">${message.text}</div>
               `
-            : '<p class="check-hint">Bereit für deinen Aha-Moment?</p>'
+            : html`
+                <p class="check-hint">Bereit für deinen Aha-Moment?</p>
+              `
         }
         <div class="instructions">
           <strong>${icon('help')} So funktioniert’s</strong>

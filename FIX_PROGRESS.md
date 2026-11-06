@@ -7,7 +7,7 @@ Each numbered finding receives one commit, including its tests and this log.
 | Finding | Status | Validation |
 | --- | --- | --- |
 | 1. Persisted data validation | Complete | Record tests: malformed JSON shapes, mixed valid/invalid stats, route membership and recomputed scores. |
-| 2. Safe HTML composition | Pending | |
+| 2. Safe HTML composition | Complete | HTML injection, quoted attributes, nested fragments and all nine board renderers tested; build passed. |
 | 3. Persistent assistance and identity | Pending | |
 | 4. Session difficulty | Pending | |
 | 5. Generation lifecycle | Pending | |

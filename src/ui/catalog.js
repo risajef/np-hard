@@ -55,23 +55,21 @@ function illustration() {
         [350, 123, 'D'],
         [283, 214, 'E'],
         [158, 203, 'F'],
-      ]
-        .map(
-          ([x, y, t]) => html`
-            <circle cx="${x}" cy="${y}" r="13" fill="#fcfdf8" stroke="#647b51" stroke-width="1.5" />
-            <text
-              x="${x}"
-              y="${y + 4}"
-              text-anchor="middle"
-              font-size="10"
-              font-family="monospace"
-              fill="#405537"
-            >
-              ${t}
-            </text>
-          `,
-        )
-        .join('')}
+      ].map(
+        ([x, y, t]) => html`
+          <circle cx="${x}" cy="${y}" r="13" fill="#fcfdf8" stroke="#647b51" stroke-width="1.5" />
+          <text
+            x="${x}"
+            y="${y + 4}"
+            text-anchor="middle"
+            font-size="10"
+            font-family="monospace"
+            fill="#405537"
+          >
+            ${t}
+          </text>
+        `,
+      )}
       <rect x="158" y="106" width="116" height="34" rx="17" fill="#fcfdf8" stroke="#d7dfcc" />
       <text
         x="216"
@@ -163,23 +161,38 @@ export function renderHome({ filter, query, stats, lastTsp }) {
             type="search"
             placeholder="Puzzle suchen …"
             aria-label="Puzzle suchen"
-            value="${query.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')}"
+            value="${query
+              .replaceAll('&', '&amp;')
+              .replaceAll('"', '&quot;')
+              .replaceAll(
+                html`
+                  <
+                `,
+                '&lt;',
+              )}"
           />
         </label>
       </div>
       <div class="filters" role="group" aria-label="Problemkategorie">
-        ${['Alle', 'Graphen', 'Routen', 'Logik', 'Optimierung', 'Planung', 'Geometrie']
-          .map(
-            (f) => html`
-              <button class="filter ${f === filter ? 'selected' : ''}" data-filter="${f}">
-                ${f}
-              </button>
-            `,
-          )
-          .join('')}
+        ${['Alle', 'Graphen', 'Routen', 'Logik', 'Optimierung', 'Planung', 'Geometrie'].map(
+          (f) => html`
+            <button class="filter ${f === filter ? 'selected' : ''}" data-filter="${f}">
+              ${f}
+            </button>
+          `,
+        )}
       </div>
       <div class="card-grid">
-        ${shown.map((m) => card(m, MODES.indexOf(m), stats)).join('') || '<div class="empty"><h3>Kein Puzzle gefunden.</h3><p>Versuche einen anderen Suchbegriff.</p></div>'}
+        ${
+          shown.length
+            ? shown.map((m) => card(m, MODES.indexOf(m), stats))
+            : html`
+                <div class="empty">
+                  <h3>Kein Puzzle gefunden.</h3>
+                  <p>Versuche einen anderen Suchbegriff.</p>
+                </div>
+              `
+        }
       </div>
     </section>
     <div class="bottom-strip">
@@ -236,6 +249,6 @@ export function renderProgress({ stats }) {
         <span>Minuten geknobelt</span>
       </div>
     </div>
-    <div class="card-grid">${MODES.map((m, i) => card(m, i, stats)).join('')}</div>
+    <div class="card-grid">${MODES.map((m, i) => card(m, i, stats))}</div>
   `;
 }

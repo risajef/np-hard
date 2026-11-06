@@ -35,10 +35,16 @@ export function renderShell({ view, stats, modal }, content) {
         ${MODES.map(
           (m) => html`
             <button class="nav-item ${view === m.id ? 'active' : ''}" data-game="${m.id}">
-              ${icon(m.icon)}${m.short}${stats[m.id]?.solved ? '<span class="nav-dot"></span>' : ''}
+              ${icon(m.icon)}${m.short}${
+                stats[m.id]?.solved
+                  ? html`
+                      <span class="nav-dot"></span>
+                    `
+                  : ''
+              }
             </button>
           `,
-        ).join('')}
+        )}
       </nav>
       <div class="sidebar-note">
         <span class="spark">✳</span>

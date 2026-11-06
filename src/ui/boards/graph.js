@@ -4,8 +4,8 @@ import { COLORS, label, node, svgBoard } from './common.js';
 export function graphBoard({ puzzle, state, evaluation, graphPoints }) {
   const points = graphPoints ?? puzzle.points;
   const coloring = puzzle.id === 'color';
-  let drawing = puzzle.edges
-    .map(
+  const drawing = [
+    puzzle.edges.map(
       ([a, b], index) => html`
         <path
           data-graph-edge="${index}"
@@ -14,10 +14,10 @@ export function graphBoard({ puzzle, state, evaluation, graphPoints }) {
           stroke-width="2"
         />
       `,
-    )
-    .join('');
-  drawing += points
-    .map((point, i) => {
+    ),
+  ];
+  drawing.push(
+    points.map((point, i) => {
       const chosen = Boolean(state & (1 << i));
       const fill = coloring
         ? COLORS[state[i]] || '#fffef8'
@@ -29,8 +29,8 @@ export function graphBoard({ puzzle, state, evaluation, graphPoints }) {
       return node(point, i, fill, coloring && i < 2 ? '●' : label(i), coloring && i < 2, {
         draggable: true,
       });
-    })
-    .join('');
+    }),
+  );
   return svgBoard(
     puzzle,
     drawing,

@@ -55,19 +55,33 @@ export function node(
 export function svgBoard(puzzle, content, caption, extraClass = '') {
   const { width = 700, height = 470 } = puzzle.board ?? {};
   const scrollable = Boolean(puzzle.board);
+  const board = html`
+    <svg viewBox="0 0 ${width} ${height}" class="game-svg" aria-label="Interaktives Spielfeld">
+      <defs>
+        <pattern id="boarddots" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="12" cy="12" r="1" fill="#cdd5c5" />
+        </pattern>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#boarddots)" />
+      ${content}
+    </svg>
+  `;
   return html`
     <div class="canvas ${extraClass}">
-      ${scrollable ? '<div class="graph-viewport" tabindex="0" aria-label="Großes Spielfeld, seitlich scrollbar">' : ''}
-      <svg viewBox="0 0 ${width} ${height}" class="game-svg" aria-label="Interaktives Spielfeld">
-        <defs>
-          <pattern id="boarddots" width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="12" cy="12" r="1" fill="#cdd5c5" />
-          </pattern>
-        </defs>
-        <rect width="${width}" height="${height}" fill="url(#boarddots)" />
-        ${content}
-      </svg>
-      ${scrollable ? '</div><p class="graph-scroll-hint">↔ Auf der freien Fläche seitlich scrollen</p>' : ''}
+      ${
+        scrollable
+          ? html`
+              <div
+                class="graph-viewport"
+                tabindex="0"
+                aria-label="Großes Spielfeld, seitlich scrollbar"
+              >
+                ${board}
+              </div>
+              <p class="graph-scroll-hint">↔ Auf der freien Fläche seitlich scrollen</p>
+            `
+          : board
+      }
       <div class="canvas-caption">
         <span>${caption}</span>
         <span>SEED ${puzzle.seed.toString(16).toUpperCase()}</span>

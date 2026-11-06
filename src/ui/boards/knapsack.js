@@ -23,38 +23,36 @@ export function knapsackBoard({ puzzle, state, evaluation }) {
         <span>↔ Breite = Wert · 2 px / Wertpunkt</span>
       </div>
       <div class="cargo-items">
-        ${puzzle.items
-          .map(
-            (item, i) => html`
-              <button
-                class="cargo-item ${state & (1 << i) ? 'packed' : ''}"
-                data-node="${i}"
-                aria-pressed="${Boolean(state & (1 << i))}"
-                aria-label="${item.name}: ${item.weight} kg, Wert ${item.value}"
-              >
-                <span class="cargo-shape-space">
-                  <span
-                    class="cargo-shape"
-                    style="width:${item.value * 2}px;height:${item.weight * 6}px"
-                  >
-                    <span>
-                      ${icon(['route', 'square', 'logic', 'nodes', 'bag', 'pin', 'gallery', 'schedule', 'star'][i % 9])}
-                    </span>
+        ${puzzle.items.map(
+          (item, i) => html`
+            <button
+              class="cargo-item ${state & (1 << i) ? 'packed' : ''}"
+              data-node="${i}"
+              aria-pressed="${Boolean(state & (1 << i))}"
+              aria-label="${item.name}: ${item.weight} kg, Wert ${item.value}"
+            >
+              <span class="cargo-shape-space">
+                <span
+                  class="cargo-shape"
+                  style="width:${item.value * 2}px;height:${item.weight * 6}px"
+                >
+                  <span>
+                    ${icon(['route', 'square', 'logic', 'nodes', 'bag', 'pin', 'gallery', 'schedule', 'star'][i % 9])}
                   </span>
                 </span>
-                <span class="cargo-name">
-                  ${item.name}
-                  <b>${state & (1 << i) ? '✓' : '+'}</b>
-                </span>
-                <span class="cargo-dimensions">
-                  ${item.weight} kg
-                  <i>·</i>
-                  ${item.value} Wert
-                </span>
-              </button>
-            `,
-          )
-          .join('')}
+              </span>
+              <span class="cargo-name">
+                ${item.name}
+                <b>${state & (1 << i) ? '✓' : '+'}</b>
+              </span>
+              <span class="cargo-dimensions">
+                ${item.weight} kg
+                <i>·</i>
+                ${item.value} Wert
+              </span>
+            </button>
+          `,
+        )}
       </div>
     </div>
   `;

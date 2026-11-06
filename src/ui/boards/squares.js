@@ -4,30 +4,37 @@ import { squaresOverlap } from '../../problems/enclosing-squares.js';
 
 export function squaresBoard({ puzzle, state, evaluation }) {
   const { grid, side } = puzzle;
-  let drawing = html`
-    <defs>
-      <pattern
-        id="square-placement-grid"
-        width="${grid.cell}"
-        height="${grid.cell}"
+  const drawing = [
+    html`
+      <defs>
+        <pattern
+          id="square-placement-grid"
+          width="${grid.cell}"
+          height="${grid.cell}"
+          x="${grid.x - grid.cell / 2}"
+          y="${grid.y - grid.cell / 2}"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M${grid.cell} 0 H0 V${grid.cell}"
+            fill="none"
+            stroke="#dce3d2"
+            stroke-width=".6"
+          />
+        </pattern>
+      </defs>
+      <rect width="700" height="470" fill="#f5f7ef" />
+      <rect
         x="${grid.x - grid.cell / 2}"
         y="${grid.y - grid.cell / 2}"
-        patternUnits="userSpaceOnUse"
-      >
-        <path d="M${grid.cell} 0 H0 V${grid.cell}" fill="none" stroke="#dce3d2" stroke-width=".6" />
-      </pattern>
-    </defs>
-    <rect width="700" height="470" fill="#f5f7ef" />
-    <rect
-      x="${grid.x - grid.cell / 2}"
-      y="${grid.y - grid.cell / 2}"
-      width="${grid.columns * grid.cell}"
-      height="${grid.rows * grid.cell}"
-      fill="url(#square-placement-grid)"
-    />
-  `;
-  drawing += state
-    .map((index) => {
+        width="${grid.columns * grid.cell}"
+        height="${grid.rows * grid.cell}"
+        fill="url(#square-placement-grid)"
+      />
+    `,
+  ];
+  drawing.push(
+    state.map((index) => {
       const square = puzzle.squares[index];
       return html`
         <rect
@@ -43,10 +50,10 @@ export function squaresBoard({ puzzle, state, evaluation }) {
           pointer-events="none"
         />
       `;
-    })
-    .join('');
-  drawing += puzzle.points
-    .map(
+    }),
+  );
+  drawing.push(
+    puzzle.points.map(
       (point, i) => html`
         <circle
           cx="${point.x}"
@@ -58,10 +65,10 @@ export function squaresBoard({ puzzle, state, evaluation }) {
           pointer-events="none"
         />
       `,
-    )
-    .join('');
-  drawing += puzzle.squares
-    .map((square, i) => {
+    ),
+  );
+  drawing.push(
+    puzzle.squares.map((square, i) => {
       const selected = state.includes(i);
       const blocked =
         !selected && state.some((index) => squaresOverlap(square, puzzle.squares[index], side));
@@ -107,8 +114,8 @@ export function squaresBoard({ puzzle, state, evaluation }) {
           />
         </g>
       `;
-    })
-    .join('');
+    }),
+  );
   return svgBoard(
     puzzle,
     drawing,
