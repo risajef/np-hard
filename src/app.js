@@ -10,8 +10,9 @@ import { renderGame, formatTime } from './ui/game.js';
 import { JobDragController, reorderOperations } from './ui/job-drag.js';
 
 export class PuzzleApp {
-  constructor(root, storage) {
+  constructor(root, storage, { generate = generatePuzzle } = {}) {
     this.root = root;
+    this.generate = generate;
     this.records = new PlayerRecords(storage);
     this.stats = this.records.stats();
     this.lastTsp = this.records.lastTsp();
@@ -25,12 +26,13 @@ export class PuzzleApp {
     this.modal = false;
     this.busy = false;
     this.timer = setInterval(() => this.tick(), 1000);
-    document.addEventListener('keydown', (event) => {
+    this.onKeydown = (event) => {
       if (event.key === 'Escape' && this.modal) {
         this.modal = false;
         this.render();
       }
-    });
+    };
+    document.addEventListener('keydown', this.onKeydown);
     this.render();
   }
 
@@ -39,7 +41,7 @@ export class PuzzleApp {
   }
 
   async openProblem(id, { fresh = false, difficulty, seed } = {}) {
-    if (this.busy) return;
+    this.cancelGeneration();
     if (!fresh && seed === undefined && this.sessions.has(id)) {
       this.view = id;
       this.render();
@@ -52,14 +54,17 @@ export class PuzzleApp {
     toast.setAttribute('role', 'status');
     toast.textContent = 'Neue Aufgabe wird erzeugt und geprüft …';
     document.body.append(toast);
-    // Give the browser one paint before the bounded exact generator runs.
-    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    const operation = { controller: new AbortController(), toast };
+    this.generation = operation;
     try {
       const resume = !fresh && id === 'tsp' ? this.lastTsp : null;
       const chosenDifficulty =
         difficulty ?? resume?.difficulty ?? this.sessions.get(id)?.puzzle.difficulty ?? 1;
       const chosenSeed = seed ?? resume?.seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
-      const puzzle = await generatePuzzle(id, chosenSeed, chosenDifficulty);
+      const puzzle = await this.generate(id, chosenSeed, chosenDifficulty, {
+        signal: operation.controller.signal,
+      });
+      if (this.generation !== operation) return;
       this.sessions.set(id, this.createSession(puzzle));
       this.view = id;
       if (id === 'tsp') {
@@ -69,14 +74,41 @@ export class PuzzleApp {
       this.render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
+      if (this.generation !== operation || error.name === 'AbortError') return;
       toast.textContent = error.message;
       toast.classList.add('generation-error');
       setTimeout(() => toast.remove(), 6000);
     } finally {
-      this.busy = false;
-      this.root.removeAttribute('aria-busy');
-      if (!toast.classList.contains('generation-error')) toast.remove();
+      if (this.generation === operation) {
+        this.generation = null;
+        this.busy = false;
+        this.root.removeAttribute('aria-busy');
+        if (!toast.classList.contains('generation-error')) toast.remove();
+      }
     }
+  }
+
+  cancelGeneration() {
+    const operation = this.generation;
+    this.generation = null;
+    operation?.controller.abort();
+    operation?.toast.remove();
+    this.busy = false;
+    this.root.removeAttribute('aria-busy');
+  }
+
+  navigate(view) {
+    this.cancelGeneration();
+    this.view = view;
+    this.render();
+  }
+
+  dispose() {
+    this.cancelGeneration();
+    clearInterval(this.timer);
+    document.removeEventListener('keydown', this.onKeydown);
+    this.graphController?.destroy();
+    this.dragController?.cancel();
   }
 
   createSession(puzzle) {
@@ -131,8 +163,7 @@ export class PuzzleApp {
       (element) =>
         (element.onclick = (event) => {
           event.preventDefault();
-          this.view = element.dataset.view;
-          this.render();
+          this.navigate(element.dataset.view);
           window.scrollTo(0, 0);
         }),
     );

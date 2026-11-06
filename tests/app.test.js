@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generate } from '../src/engine.js';
 import { puzzleIdentity } from '../src/core/puzzle-identity.js';
-import { makeApp, memoryStorage, installSession } from './app-fixture.js';
+import { makeApp, memoryStorage, installSession, withBrowser } from './app-fixture.js';
 
 test('revealed puzzles remain assisted after reset and reload, without awards or records', () => {
   const storage = memoryStorage();
@@ -61,4 +61,46 @@ test('cached sessions and new-puzzle actions retain their own difficulty', async
   };
   app.action('new');
   assert.deepEqual(request, { id: 'tsp', fresh: true, difficulty: 1 });
+});
+
+test('navigation cancels generation and ignores a late result', async () => {
+  await withBrowser(async () => {
+    let resolve, signal;
+    const app = makeApp(undefined, {
+      generate: (...args) => {
+        signal = args[3].signal;
+        return new Promise((done) => {
+          resolve = done;
+        });
+      },
+    });
+    const opening = app.openProblem('tsp', { seed: 42 });
+    assert.equal(app.busy, true);
+    app.navigate('progress');
+    assert.equal(signal.aborted, true);
+    resolve(generate('tsp', 42, 1));
+    await opening;
+    assert.equal(app.view, 'progress');
+    assert.equal(app.busy, false);
+    assert.equal(app.sessions.size, 0);
+  });
+});
+
+test('a superseding request wins and stale cleanup cannot clear its busy state', async () => {
+  await withBrowser(async () => {
+    const pending = [];
+    const app = makeApp(undefined, {
+      generate: () => new Promise((resolve) => pending.push(resolve)),
+    });
+    const first = app.openProblem('tsp', { seed: 42 });
+    const second = app.openProblem('knapsack', { seed: 42, difficulty: 3 });
+    pending[0](generate('tsp', 42, 1));
+    await first;
+    assert.equal(app.busy, true);
+    pending[1](generate('knapsack', 42, 3));
+    await second;
+    assert.equal(app.view, 'knapsack');
+    assert.equal(app.session.puzzle.difficulty, 3);
+    assert.equal(app.busy, false);
+  });
 });
