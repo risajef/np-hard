@@ -1,6 +1,26 @@
 export const EPSILON = 1e-7;
+export const MAX_MASK_BITS = 30;
+
+function maskCount(count) {
+  if (!Number.isInteger(count) || count < 0 || count > MAX_MASK_BITS)
+    throw new RangeError(
+      `Small masks support 0–${MAX_MASK_BITS} bits; use BigInt for larger problems.`,
+    );
+}
+
+function coverMasks(cover, count = MAX_MASK_BITS) {
+  maskCount(count);
+  const full = 2 ** count - 1;
+  if (
+    !Array.isArray(cover) ||
+    !Array.from(cover).every((mask) => Number.isInteger(mask) && mask >= 0 && mask <= full)
+  )
+    throw new RangeError('Coverage masks must be nonnegative integers within the target range.');
+}
 
 export function bitCount(mask) {
+  if (!Number.isInteger(mask) || mask < 0 || mask > 0xffffffff)
+    throw new RangeError('bitCount requires an unsigned 32-bit integer.');
   let count = 0;
   for (; mask; mask >>>= 1) count += mask & 1;
   return count;
@@ -20,6 +40,7 @@ export function* permutations(values) {
 
 /** Minimize a score over every nonempty subset. Infinite scores are infeasible. */
 export function solveSubsets(count, score) {
+  maskCount(count);
   let best = Infinity;
   let solution = 0;
   let ties = 0;
@@ -37,11 +58,20 @@ export function solveSubsets(count, score) {
 }
 
 export function coveredBy(cover, selected) {
+  coverMasks(cover);
+  if (
+    !Array.isArray(selected) ||
+    !Array.from(selected).every(
+      (index) => Number.isInteger(index) && index >= 0 && index < cover.length,
+    )
+  )
+    throw new RangeError('Selected coverage indices are out of range.');
   return selected.reduce((mask, index) => mask | cover[index], 0);
 }
 
 /** Standard maximum-new-coverage heuristic with explicit tie breaking. */
 export function greedyCover(cover, targetCount, reverse = false) {
+  coverMasks(cover, targetCount);
   const full = (1 << targetCount) - 1;
   let covered = 0;
   const chosen = [];
@@ -78,6 +108,7 @@ export function solveCover(
   nodeLimit = 100000,
   { conflicts = [], incumbent = null } = {},
 ) {
+  coverMasks(cover, targetCount);
   const full = (1 << targetCount) - 1;
   const candidates = Array.from({ length: targetCount }, (_, target) =>
     cover.flatMap((mask, i) => (mask & (1 << target) ? [i] : [])),
@@ -141,6 +172,8 @@ export function solveCover(
 
 /** Delete redundant choices after greedy selection, in either deletion order. */
 export function pruneCover(cover, selected, targetCount, reverse = false) {
+  coverMasks(cover, targetCount);
+  coveredBy(cover, selected);
   let result = [...selected];
   const order = reverse ? [...selected].reverse() : [...selected];
   const full = (1 << targetCount) - 1;
