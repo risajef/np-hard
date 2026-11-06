@@ -12,10 +12,9 @@ export class PuzzleApp {
   constructor(root, storage) {
     this.root = root;
     this.records = new PlayerRecords(storage);
-    this.stats = this.records.read('np-studio-stats', {});
-    if (!this.stats || typeof this.stats !== 'object' || Array.isArray(this.stats)) this.stats = {};
-    this.lastTsp = this.records.read('np-studio-last-tsp-v2', null);
-    this.awardedPuzzles = new Set(this.records.read('np-studio-awarded-v2', []));
+    this.stats = this.records.stats();
+    this.lastTsp = this.records.lastTsp();
+    this.awardedPuzzles = this.records.awarded();
     this.sessions = new Map();
     this.view = 'home';
     this.filter = 'Alle';
