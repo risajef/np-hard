@@ -78,7 +78,7 @@ export class EnclosingSquaresProblem extends Problem {
           : [],
       ),
     );
-    return { version: 4, grid: { ...GRID }, squares, side: SIDE, points, cover };
+    return { grid: { ...GRID }, squares, side: SIDE, points, cover };
   }
 
   conflicts(puzzle) {

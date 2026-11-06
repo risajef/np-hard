@@ -1,3 +1,4 @@
+import { puzzleIdentity } from './core/puzzle-identity.js';
 import { SpringSimulation } from './core/spring-simulation.js';
 import { GraphController } from './ui/graph-controller.js';
 import { initial, evaluate, problems } from './engine.js';
@@ -15,6 +16,7 @@ export class PuzzleApp {
     this.stats = this.records.stats();
     this.lastTsp = this.records.lastTsp();
     this.awardedPuzzles = this.records.awarded();
+    this.assistedPuzzles = this.records.identities('np-studio-assisted-v3');
     this.sessions = new Map();
     this.view = 'home';
     this.filter = 'Alle';
@@ -58,32 +60,11 @@ export class PuzzleApp {
       const chosenDifficulty = difficulty ?? resume?.difficulty ?? this.difficulty;
       const chosenSeed = seed ?? resume?.seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
       const puzzle = await generatePuzzle(id, chosenSeed, chosenDifficulty);
-      const best = id === 'tsp' ? this.records.best(puzzle) : null;
-      const state = best ? [...best.route] : initial(puzzle);
       this.difficulty = chosenDifficulty;
-      this.sessions.set(id, {
-        puzzle,
-        graphSimulation: ['color', 'dom'].includes(id)
-          ? new SpringSimulation(puzzle.points, puzzle.edges, {
-              ...puzzle.board,
-              planar: id === 'color',
-            })
-          : null,
-        state,
-        colorChoices: id === 'color' ? problems.get(id).manualColors(puzzle) : null,
-        history: [],
-        message: null,
-        help: false,
-        revealed: false,
-        assisted: false,
-        awarded: this.awardedPuzzles.has(`${id}:${chosenSeed}:${chosenDifficulty}`),
-        seconds: 0,
-        started: Date.now(),
-        improvement: null,
-      });
+      this.sessions.set(id, this.createSession(puzzle));
       this.view = id;
       if (id === 'tsp') {
-        this.lastTsp = { seed: chosenSeed, difficulty: chosenDifficulty };
+        this.lastTsp = { seed: chosenSeed, difficulty: chosenDifficulty, version: puzzle.version };
         this.records.write('np-studio-last-tsp-v2', this.lastTsp);
       }
       this.render();
@@ -97,6 +78,32 @@ export class PuzzleApp {
       this.root.removeAttribute('aria-busy');
       if (!toast.classList.contains('generation-error')) toast.remove();
     }
+  }
+
+  createSession(puzzle) {
+    const id = puzzle.id;
+    const best = id === 'tsp' ? this.records.best(puzzle) : null;
+    const state = best ? [...best.route] : initial(puzzle);
+    return {
+      puzzle,
+      graphSimulation: ['color', 'dom'].includes(id)
+        ? new SpringSimulation(puzzle.points, puzzle.edges, {
+            ...puzzle.board,
+            planar: id === 'color',
+          })
+        : null,
+      state,
+      colorChoices: id === 'color' ? problems.get(id).manualColors(puzzle) : null,
+      history: [],
+      message: null,
+      help: false,
+      revealed: false,
+      assisted: this.assistedPuzzles.has(puzzleIdentity(puzzle)),
+      awarded: this.awardedPuzzles.has(puzzleIdentity(puzzle)),
+      seconds: 0,
+      started: Date.now(),
+      improvement: null,
+    };
   }
 
   render() {
@@ -274,6 +281,8 @@ export class PuzzleApp {
     if (action === 'reveal') {
       session.revealed = true;
       session.assisted = true;
+      this.assistedPuzzles.add(puzzleIdentity(session.puzzle));
+      this.records.write('np-studio-assisted-v3', [...this.assistedPuzzles]);
       session.improvement = null;
       session.state = structuredClone(session.puzzle.solution);
       session.message = {
@@ -297,10 +306,8 @@ export class PuzzleApp {
           seconds: previous.seconds + session.seconds,
         };
         this.records.write('np-studio-stats', this.stats);
-        this.awardedPuzzles.add(
-          `${session.puzzle.id}:${session.puzzle.seed}:${session.puzzle.difficulty}`,
-        );
-        this.records.write('np-studio-awarded-v2', [...this.awardedPuzzles]);
+        this.awardedPuzzles.add(puzzleIdentity(session.puzzle));
+        this.records.write('np-studio-awarded-v3', [...this.awardedPuzzles]);
       }
       session.message = {
         type: 'success',

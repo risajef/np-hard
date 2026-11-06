@@ -14,6 +14,7 @@ function storage() {
 test('TSP keeps the best complete unassisted route across reset and reload', () => {
   const store = storage();
   const puzzle = {
+    id: 'tsp',
     version: 2,
     seed: 42,
     difficulty: 2,
@@ -51,6 +52,7 @@ test('unavailable storage does not break best-route tracking', () => {
   };
   const records = new PlayerRecords(store);
   const puzzle = {
+    id: 'tsp',
     version: 2,
     seed: 1,
     difficulty: 1,
@@ -103,16 +105,18 @@ test('valid JSON with invalid shapes is rejected without discarding healthy entr
   assert.deepEqual([...records.awarded()], []);
   assert.equal(records.lastTsp(), null);
   assert.deepEqual(records.stats(), { tsp: { solved: 2, seconds: 30 } });
+  store.setItem('np-studio-awarded-v3', 'null');
   store.setItem(
     'np-studio-awarded-v2',
     JSON.stringify(['tsp:42:1', 'bad:42:1', 'tsp:4294967296:1', null]),
   );
-  assert.deepEqual([...records.awarded()], ['tsp:42:1']);
+  assert.deepEqual([...records.awarded()], ['tsp:2:42:1']);
 });
 
 test('saved routes are checked against geometry and scores are recomputed', () => {
   const store = storage();
   const puzzle = {
+    id: 'tsp',
     version: 2,
     seed: 42,
     difficulty: 1,

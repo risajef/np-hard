@@ -1,3 +1,4 @@
+import { generatorVersion } from '../core/puzzle-identity.js';
 import { Random } from '../core/random.js';
 
 /** Each concrete problem owns generation, exact solving, state and heuristics. */
@@ -7,7 +8,13 @@ export class Problem {
     for (let attempt = 0; attempt < 6000; attempt++) {
       const candidate = this.create(random, difficulty);
       if (!candidate) continue;
-      const puzzle = { id: this.id, version: 2, seed, difficulty, ...candidate };
+      const puzzle = {
+        id: this.id,
+        version: generatorVersion(this.id),
+        seed,
+        difficulty,
+        ...candidate,
+      };
       const exact = this.solve(puzzle);
       if (exact.aborted || exact.count !== 1 || !Number.isFinite(exact.best)) continue;
       Object.assign(puzzle, exact);

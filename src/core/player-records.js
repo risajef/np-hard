@@ -1,3 +1,4 @@
+import { generatorVersion, puzzleIdentity, validIdentity } from './puzzle-identity.js';
 import { MODES } from '../modes.js';
 import { routeLength } from '../problems/tsp.js';
 
@@ -47,36 +48,40 @@ export class PlayerRecords {
     return object(value) &&
       nonnegative(value.seed) &&
       value.seed < 2 ** 32 &&
-      [1, 2, 3].includes(value.difficulty)
-      ? { seed: value.seed, difficulty: value.difficulty }
+      [1, 2, 3].includes(value.difficulty) &&
+      (value.version ?? 2) === generatorVersion('tsp')
+      ? { seed: value.seed, difficulty: value.difficulty, version: generatorVersion('tsp') }
       : null;
   }
 
+  identities(key) {
+    const value = this.read(key, []);
+    return new Set(Array.isArray(value) ? value.filter(validIdentity) : []);
+  }
+
   awarded() {
-    const value = this.read('np-studio-awarded-v2', []);
-    return new Set(
-      Array.isArray(value)
-        ? value.filter((key) => {
-            if (typeof key !== 'string') return false;
-            const parts = key.split(':');
-            return (
-              parts.length === 3 &&
-              MODES.some(({ id }) => id === parts[0]) &&
-              /^(0|[1-9]\d*)$/.test(parts[1]) &&
-              Number(parts[1]) < 2 ** 32 &&
-              /^[123]$/.test(parts[2])
-            );
-          })
-        : [],
-    );
+    if (this.read('np-studio-awarded-v3', null) !== null)
+      return this.identities('np-studio-awarded-v3');
+    const legacy = this.read('np-studio-awarded-v2', []);
+    const migrated = new Set();
+    for (const key of Array.isArray(legacy) ? legacy : []) {
+      if (typeof key !== 'string') continue;
+      const [id, seed, difficulty] = key.split(':');
+      const identity = `${id}:${generatorVersion(id)}:${seed}:${difficulty}`;
+      if (key.split(':').length === 3 && validIdentity(identity)) migrated.add(identity);
+    }
+    this.write('np-studio-awarded-v3', [...migrated]);
+    return migrated;
   }
 
   key(puzzle) {
-    return `${puzzle.version}:${puzzle.seed}:${puzzle.difficulty}`;
+    return puzzleIdentity(puzzle);
   }
 
   best(puzzle) {
-    const record = this.records[this.key(puzzle)];
+    const record =
+      this.records[this.key(puzzle)] ??
+      this.records[`${puzzle.version}:${puzzle.seed}:${puzzle.difficulty}`];
     if (
       !object(record) ||
       !Array.isArray(record.route) ||
