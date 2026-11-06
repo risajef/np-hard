@@ -21,7 +21,6 @@ export class PuzzleApp {
     this.view = 'home';
     this.filter = 'Alle';
     this.query = '';
-    this.difficulty = 1;
     this.color = 2;
     this.modal = false;
     this.busy = false;
@@ -57,10 +56,10 @@ export class PuzzleApp {
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
     try {
       const resume = !fresh && id === 'tsp' ? this.lastTsp : null;
-      const chosenDifficulty = difficulty ?? resume?.difficulty ?? this.difficulty;
+      const chosenDifficulty =
+        difficulty ?? resume?.difficulty ?? this.sessions.get(id)?.puzzle.difficulty ?? 1;
       const chosenSeed = seed ?? resume?.seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
       const puzzle = await generatePuzzle(id, chosenSeed, chosenDifficulty);
-      this.difficulty = chosenDifficulty;
       this.sessions.set(id, this.createSession(puzzle));
       this.view = id;
       if (id === 'tsp') {
@@ -118,7 +117,6 @@ export class PuzzleApp {
       content = renderGame({
         ...session,
         graphPoints: session.graphSimulation?.positions,
-        difficulty: this.difficulty,
         color: this.color,
         best: session.puzzle.id === 'tsp' ? this.records.best(session.puzzle) : null,
       });
@@ -258,7 +256,8 @@ export class PuzzleApp {
     }
     const session = this.session;
     if (!session) return;
-    if (action === 'new') return this.openProblem(this.view, { fresh: true });
+    if (action === 'new')
+      return this.openProblem(this.view, { fresh: true, difficulty: session.puzzle.difficulty });
     if (action === 'help') session.help = !session.help;
     if (action === 'undo' && session.history.length) {
       Object.assign(session, session.history.pop());

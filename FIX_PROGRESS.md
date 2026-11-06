@@ -9,7 +9,7 @@ Each numbered finding receives one commit, including its tests and this log.
 | 1. Persisted data validation | Complete | Record tests: malformed JSON shapes, mixed valid/invalid stats, route membership and recomputed scores. |
 | 2. Safe HTML composition | Complete | HTML injection, quoted attributes, nested fragments and all nine board renderers tested; build passed. |
 | 3. Persistent assistance and identity | Complete | Versioned shared identities, one-time award migration, reveal/reset/reload and version-isolation regressions; seven app/record tests passed. |
-| 4. Session difficulty | Pending | |
+| 4. Session difficulty | Complete | Mixed-mode cached navigation, rendered level and new-puzzle level regression passed. |
 | 5. Generation lifecycle | Pending | |
 | 6. Evaluator contracts | Pending | |
 | 7. Keyboard focus | Pending | |

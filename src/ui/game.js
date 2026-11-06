@@ -47,7 +47,6 @@ function renderTspRecord(evaluation, best, improvement) {
 export function renderGame({
   puzzle: p,
   state: s,
-  difficulty,
   color,
   history,
   message,
@@ -58,6 +57,7 @@ export function renderGame({
   improvement,
   graphPoints,
 }) {
+  const difficulty = p.difficulty;
   const m = MODES.find((m) => m.id === p.id),
     e = evaluate(p, s),
     metric =

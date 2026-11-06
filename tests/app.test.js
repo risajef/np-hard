@@ -1,3 +1,4 @@
+import { renderGame } from '../src/ui/game.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generate } from '../src/engine.js';
@@ -43,4 +44,21 @@ test('legacy awards migrate once and new awards use versioned identities', () =>
   app.check();
   const reloaded = makeApp(storage);
   assert.ok(reloaded.awardedPuzzles.has(puzzleIdentity({ ...puzzle, version: 3 })));
+});
+
+test('cached sessions and new-puzzle actions retain their own difficulty', async () => {
+  const app = makeApp();
+  const easy = generate('tsp', 42, 1);
+  installSession(app, easy);
+  installSession(app, generate('knapsack', 42, 3));
+  await app.openProblem('tsp');
+  assert.equal(app.session.puzzle.difficulty, 1);
+  const markup = String(renderGame({ ...app.session, difficulty: 3 }));
+  assert.match(markup, /value="1" selected/);
+  let request;
+  app.openProblem = (id, options) => {
+    request = { id, ...options };
+  };
+  app.action('new');
+  assert.deepEqual(request, { id: 'tsp', fresh: true, difficulty: 1 });
 });
