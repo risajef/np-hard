@@ -104,3 +104,40 @@ test('a superseding request wins and stale cleanup cannot clear its busy state',
     assert.equal(app.busy, false);
   });
 });
+
+test('application startup tolerates malformed persisted collections and preserves healthy stats', () => {
+  const storage = memoryStorage();
+  storage.setItem('np-studio-awarded-v2', '{}');
+  storage.setItem('np-studio-assisted-v3', '42');
+  storage.setItem('np-studio-last-tsp-v2', '{"seed":"42","difficulty":1}');
+  storage.setItem(
+    'np-studio-stats',
+    JSON.stringify({ sat: { solved: 2, seconds: 30 }, tsp: null }),
+  );
+  const app = makeApp(storage);
+  assert.deepEqual(app.stats, { sat: { solved: 2, seconds: 30 } });
+  assert.equal(app.awardedPuzzles.size, 0);
+  assert.equal(app.assistedPuzzles.size, 0);
+  assert.equal(app.lastTsp, null);
+});
+
+test('disposing the application cancels work and ignores late completion', async () => {
+  await withBrowser(async () => {
+    let resolve, signal;
+    const app = makeApp(undefined, {
+      generate: (...args) => {
+        signal = args[3].signal;
+        return new Promise((done) => {
+          resolve = done;
+        });
+      },
+    });
+    const opening = app.openProblem('tsp', { seed: 42 });
+    app.dispose();
+    assert.equal(signal.aborted, true);
+    resolve(generate('tsp', 42, 1));
+    await opening;
+    assert.equal(app.sessions.size, 0);
+    assert.equal(app.busy, false);
+  });
+});

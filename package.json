@@ -6,13 +6,14 @@
     "start": "vite",
     "test": "node --test --test-isolation=none tests/*.test.js",
     "build": "vite build",
-    "format": "prettier --write index.html vite.config.js src scripts tests package.json .prettierrc.json",
-    "format:check": "prettier --check index.html vite.config.js src scripts tests package.json .prettierrc.json",
+    "format": "prettier --write index.html vite.config.js src scripts tests package.json .prettierrc.json .github",
+    "format:check": "prettier --check index.html vite.config.js src scripts tests package.json .prettierrc.json .github",
     "dev": "vite",
     "test:browser": "node tests/browser-smoke.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "playwright": "1.65.0",
     "prettier": "^3.9.10",
     "vite": "^8.3.5"
   },

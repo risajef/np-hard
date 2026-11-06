@@ -28,7 +28,7 @@ Der Build liegt in `dist/`: eine kleine `index.html` sowie separate JavaScript- 
 npm test             # Generatoren, Solver, Heuristiken, Bestwerte und Physik
 npm run format       # Quellcode einheitlich formatieren
 npm run format:check
-npm run test:browser # Browserprüfungen gegen einen laufenden Server
+npm run test:browser # Isolierte Browserprüfung des Produktionsbuilds
 ```
 
 ## Code-Struktur
@@ -142,13 +142,17 @@ Der Browser speichert Fortschritt und TSP-Bestleistungen lokal. Es gibt keinen S
 
 `npm test` prüft 135 Aufgaben über neun Modi und drei Schwierigkeitsgrade. Enthalten sind unabhängige Teilmengenprüfungen, die Greedy-Schranken, Planarität nach der Federsimulation, wechselnde Räume, Wandblockaden, alle Rasterpositionen und das Verbot von Zwei-Wachen-Lösungen. Der Set-Cover-Solver wird zusätzlich an 150 kleinen Zufallsinstanzen mit vollständiger unabhängiger Enumeration verglichen. Weitere 150 Instanzen prüfen Konflikte zwischen Platzierungen und sichere obere Schranken. Der BigInt-basierte Packing-Solver für dichte Punktwolken wird mit unabhängiger Enumeration verglichen und unterstützt mehr als 64 Punkte. Regressionstests weisen das frühere Muster aus vier Ecken plus Mittelpunkt ausdrücklich zurück. Squares wird auch aus einem JSON-Export allein anhand der Punkte erneut exakt gelöst. Weitere Tests prüfen TSP-Persistenz, Drag-and-drop-Reihenfolgen sowie lang laufende Physik, Pinning, Freigabe, Grenzen und Planarität.
 
-Die Browserprüfung läuft gegen den Entwicklungsserver oder den gebauten statischen Build und kontrolliert alle neun Spielansichten, Bestwertverbesserung und Wiederherstellung, SAT-Literale, Gegenstandsmaße, Drag-and-drop samt Rückgängig, fortlaufende Graph-Animation, Knoten-Dragging ohne Antwortänderung, Weiterbewegung nach dem Loslassen, Erhalt des Layouts bei UI-Änderungen, Abbruch alter Animationsschleifen, Rasterplatzierung, Lösungen und Layout bei 1440 und 390 Pixeln.
+Die Browserprüfung startet einen lokalen Vorschau-Server für den gebauten statischen Build und kontrolliert alle neun Spielansichten, Bestwertverbesserung und Wiederherstellung, SAT-Literale, Gegenstandsmaße, Drag-and-drop samt Rückgängig, fortlaufende Graph-Animation, Knoten-Dragging ohne Antwortänderung, Weiterbewegung nach dem Loslassen, Erhalt des Layouts bei UI-Änderungen, Abbruch alter Animationsschleifen, Rasterplatzierung, Lösungen und Layout bei 1440 und 390 Pixeln.
 
-Die wiederholbare Browserprüfung liegt in `tests/browser-smoke.mjs`. Dafür `npm run dev` oder `npm run preview` starten, Chromium mit einem **separaten Testprofil** und Debug-Port öffnen und in einem weiteren Terminal prüfen:
+Die wiederholbare Browserprüfung liegt in `tests/browser-smoke.mjs` und startet ihren eigenen Vorschau-Server auf einem freien lokalen Port sowie einen isolierten Chromium-Kontext. Sie prüft den Produktionsbuild, verwendet reproduzierbare Seeds und verändert keine Daten eines vorhandenen Browserprofils.
 
 ```sh
-chromium --headless --remote-debugging-port=9222 --user-data-dir=/tmp/np-studio-test about:blank
+npm ci
+npx playwright install chromium  # einmalig; unter Linux ggf. --with-deps
+npm run build
 npm run test:browser
 ```
 
-Der Test setzt ausschließlich die NP-Studio-Daten in diesem Testprofil zurück. Screenshots landen standardmäßig in einem neuen temporären Verzeichnis. `NP_TEST_URL` kann die App-Adresse überschreiben (Standard: `http://127.0.0.1:4173`). `NP_CHROME_DEBUG_PORT` und `NP_SCREENSHOT_DIR` können Debug-Port und Screenshotverzeichnis überschreiben. Chromium gehört nicht zu den Laufzeit-Abhängigkeiten der Webseite.
+`NP_TEST_SEED` setzt den Startseed (Standard: 42). `NP_CHROMIUM_EXECUTABLE` erlaubt einen vorhandenen Chromium-Pfad. Screenshots, Diagnoseprotokoll mit Seeds und Playwright-Trace liegen unter `test-results/browser/`; `NP_SCREENSHOT_DIR` überschreibt das Verzeichnis. Trace öffnen: `npx playwright show-trace test-results/browser/trace.zip`. Protokollaufrufe besitzen Zeitlimits. Jeder Lauf nutzt einen eigenen Browser und räumt Browser und Server auch bei Fehlern auf. Es gibt keine automatischen Wiederholungen fehlgeschlagener Prüfungen.
+
+`.github/workflows/check.yml` prüft bei Push und Pull Request Formatierung, Node-Tests, Build und Browserabläufe. Diagnoseartefakte werden auch bei Fehlern hochgeladen. Der Workflow veröffentlicht nichts und benötigt keine Änderungen im übergeordneten Website-Repository.
