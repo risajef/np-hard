@@ -52,6 +52,27 @@ async function click(selector) {
     `document.querySelector(${JSON.stringify(selector)}).dispatchEvent(new MouseEvent('click',{bubbles:true}))`,
   );
 }
+async function key(key, code = key, virtual = key === 'Enter' ? 13 : 32) {
+  await command('Input.dispatchKeyEvent', {
+    type: 'keyDown',
+    text: key === 'Enter' ? '\r' : key === ' ' ? ' ' : undefined,
+    key,
+    code,
+    windowsVirtualKeyCode: virtual,
+  });
+  await command('Input.dispatchKeyEvent', {
+    type: 'keyUp',
+    key,
+    code,
+    windowsVirtualKeyCode: virtual,
+  });
+}
+async function focus(selector) {
+  await js(`document.querySelector(${JSON.stringify(selector)}).focus()`);
+}
+async function focused(selector) {
+  return js(`document.activeElement===document.querySelector(${JSON.stringify(selector)})`);
+}
 async function open(id) {
   await click(`[data-game="${id}"]`);
   await wait(`document.querySelector('.problems .active')?.dataset.game==='${id}'`);
@@ -201,6 +222,11 @@ for (const id of ['color', 'dom', 'sat', 'knapsack', 'job', 'facility', 'gallery
   await open(id);
   if (id === 'color' || id === 'dom') {
     await checkLiveGraph(id);
+    if (id === 'color') {
+      await focus('[data-color="1"]');
+      await key('Enter');
+      check(await focused('[data-color="1"]'), 'palette retains focus');
+    }
   }
   if (id === 'sat') {
     const v = await js('document.querySelector(".literal-button").dataset.node');
@@ -213,12 +239,34 @@ for (const id of ['color', 'dom', 'sat', 'knapsack', 'job', 'facility', 'gallery
         before,
       'literal updates shared variable',
     );
+    await focus('.literal-button');
+    await key('Enter');
+    check(await focused('.literal-button'), 'SAT keyboard activation retains exact literal');
   }
   if (id === 'knapsack') {
     const dims = await js(
       '[...document.querySelectorAll(".cargo-shape")].map(el=>[el.style.width,el.style.height])',
     );
     check(new Set(dims.map((d) => d.join())).size > 1, 'proportional items');
+    await focus('.cargo-item');
+    await key('Enter');
+    check(await focused('.cargo-item'), 'native item activation retains focus');
+    check(
+      await js('document.querySelectorAll(".cargo-item.packed").length===1'),
+      'native Enter packs item',
+    );
+    await key(' ', 'Space');
+    check(await focused('.cargo-item'), 'native Space retains focus');
+    check(
+      await js('document.querySelectorAll(".cargo-item.packed").length===0'),
+      'native Space unpacks item',
+    );
+    await focus('[data-action="help"]');
+    await key('Enter');
+    check(await focused('[data-action="help"]'), 'hint toggle retains focus');
+    await focus('[data-action="reset"]');
+    await key('Enter');
+    check(await focused('[data-action="reset"]'), 'reset retains focus');
   }
   if (id === 'job') {
     const positions = await js(

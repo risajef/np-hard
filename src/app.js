@@ -1,3 +1,4 @@
+import { captureFocus, restoreFocus } from './ui/focus.js';
 import { puzzleIdentity } from './core/puzzle-identity.js';
 import { SpringSimulation } from './core/spring-simulation.js';
 import { GraphController } from './ui/graph-controller.js';
@@ -28,8 +29,7 @@ export class PuzzleApp {
     this.timer = setInterval(() => this.tick(), 1000);
     this.onKeydown = (event) => {
       if (event.key === 'Escape' && this.modal) {
-        this.modal = false;
-        this.render();
+        this.action('close-modal');
       }
     };
     document.addEventListener('keydown', this.onKeydown);
@@ -138,6 +138,7 @@ export class PuzzleApp {
   }
 
   render() {
+    const focus = captureFocus(this.root);
     this.dragController?.cancel();
     this.graphController?.destroy();
     this.graphController = null;
@@ -155,6 +156,7 @@ export class PuzzleApp {
     }
     this.root.innerHTML = renderShell(this, content);
     this.bind();
+    restoreFocus(this.root, focus);
   }
 
   bind() {
@@ -178,16 +180,8 @@ export class PuzzleApp {
         }),
     );
     this.root.querySelector('#search')?.addEventListener('input', (event) => {
-      const position = event.target.selectionStart;
       this.query = event.target.value;
       this.render();
-      const search = this.root.querySelector('#search');
-      search.focus();
-      try {
-        search.setSelectionRange(position, position);
-      } catch {
-        /* search inputs may not support ranges */
-      }
     });
     all('[data-node]').forEach((element) => {
       const activate = () => this.choose(Number(element.dataset.node));
@@ -196,9 +190,7 @@ export class PuzzleApp {
         element.onkeydown = (event) => {
           if (['Enter', ' '].includes(event.key)) {
             event.preventDefault();
-            const variable = element.dataset.node;
             activate();
-            this.root.querySelector(`[data-node="${variable}"]`)?.focus();
           }
         };
     });
@@ -280,9 +272,11 @@ export class PuzzleApp {
 
   action(action) {
     if (action === 'about' || action === 'close-modal') {
+      if (action === 'about') this.modalFocus = captureFocus(this.root);
       this.modal = action === 'about';
       this.render();
-      this.root.querySelector('.modal button')?.focus();
+      if (this.modal) this.root.querySelector('.modal button')?.focus();
+      else restoreFocus(this.root, this.modalFocus);
       return;
     }
     const session = this.session;
