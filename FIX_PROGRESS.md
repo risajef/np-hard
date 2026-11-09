@@ -51,3 +51,12 @@ No parent files, published assets, or parent submodule-pointer commits are inclu
 - Regression coverage: shared-endpoint and drag cases, plus six advanced seed/difficulty combinations through initial layout and 300 animation frames. Tests verify edge clearance and valid solution coloring.
 - Validation with the companion reveal/Undo fix: all 54 Node tests, production build, formatting and isolated Chromium browser suite passed. Phone-width solution screenshot inspected locally.
 - Commit: `fix: keep coloring edges clear of unrelated nodes`. Subrepo only; no main-site update or push.
+
+## Follow-up: Undo after displaying a solution (9 November 2026)
+
+- Found a separate reproducible reveal-state defect: after playing moves and displaying the solution, Undo restored an earlier partial answer while `revealed` stayed true. The displayed board then no longer matched the displayed-solution state.
+- Undo is now disabled during reveal and its command handler ignores attempts until Reset. Reset still starts a playable board and retains the assistance marker.
+- Regression tests cover all three coloring difficulties, conflicting/manual moves, reveal, attempted Undo, repeated reveal and Reset. Browser checks inspect every actual edge's rendered endpoint colors and all 61 colored nodes after reveal/Undo at desktop and 390 px widths.
+- Validation: 54 Node tests passed; production build, formatting, diff checks and full isolated Chromium suite passed with no JavaScript errors. The mobile screenshot shows a complete revealed coloring and disabled Undo.
+- Commit: `fix: preserve displayed solutions when Undo is attempted`. Layout companion commit: `044876e`.
+- Both fixes remain local to this subrepo. The deployed website has not been updated; no parent pointer commit or push was made.

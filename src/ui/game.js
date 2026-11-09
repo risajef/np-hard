@@ -138,7 +138,11 @@ export function renderGame({
             : ''
         }${renderBoard({ puzzle: p, state: s, evaluation: e, graphPoints })}
         <div class="board-bottom">
-          <button class="text-button" data-action="undo" ${!history.length ? 'disabled' : ''}>
+          <button
+            class="text-button"
+            data-action="undo"
+            ${revealed || !history.length ? 'disabled' : ''}
+          >
             ↶ Rückgängig
           </button>
           <button class="text-button" data-action="reset">Zurücksetzen</button>

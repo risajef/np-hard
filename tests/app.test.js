@@ -141,3 +141,25 @@ test('disposing the application cancels work and ignores late completion', async
     assert.equal(app.busy, false);
   });
 });
+
+test('display solution remains a complete valid coloring after Undo and repeated reveal', () => {
+  for (const difficulty of [1, 2, 3]) {
+    const app = makeApp();
+    const puzzle = generate('color', 42, difficulty);
+    installSession(app, puzzle);
+    app.color = 2;
+    app.choose(puzzle.decisionSeeds?.[0] ?? 2);
+    assert.equal(app.session.history.length, 1);
+    app.action('reveal');
+    app.action('undo');
+    assert.deepEqual(app.session.state, puzzle.solution);
+    for (const [a, b] of puzzle.edges) assert.notEqual(app.session.state[a], app.session.state[b]);
+    app.action('reveal');
+    assert.deepEqual(app.session.state, puzzle.solution);
+    const markup = String(renderGame(app.session));
+    assert.match(markup, /data-action="undo"\s+disabled/);
+    app.action('reset');
+    assert.equal(app.session.revealed, false);
+    assert.equal(app.session.history.length, 0);
+  }
+});

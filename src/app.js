@@ -284,7 +284,7 @@ export class PuzzleApp {
     if (action === 'new')
       return this.openProblem(this.view, { fresh: true, difficulty: session.puzzle.difficulty });
     if (action === 'help') session.help = !session.help;
-    if (action === 'undo' && session.history.length) {
+    if (action === 'undo' && !session.revealed && session.history.length) {
       Object.assign(session, session.history.pop());
       session.message = null;
       session.improvement = null;

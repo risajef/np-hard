@@ -514,6 +514,40 @@ try {
   console.log(
     'PASS advanced coloring: ten decisions, bounded propagation, undo/reset and mobile layout',
   );
+  // Reveal from a played advanced board; verify actual rendered edge colors,
+  // including after an attempted Undo, at desktop and phone widths.
+  await click(`[data-color="${advanced.solution[advanced.decisionSeeds[0]]}"]`);
+  await click(`[data-node="${advanced.decisionSeeds[0]}"]`);
+  await click('[data-action="reveal"]');
+  const checkRevealedGraph = async () => {
+    check(
+      await js(`(() => {
+      const edges = ${JSON.stringify(advanced.edges)};
+      const nodes = [...document.querySelectorAll('[data-graph-node]')];
+      return nodes.length === 61 && nodes.every(n => n.querySelector('circle').getAttribute('fill') !== '#fffef8') &&
+        edges.every(([a,b]) => nodes[a].querySelector('circle').getAttribute('fill') !== nodes[b].querySelector('circle').getAttribute('fill'));
+    })()`),
+      'revealed graph has different colors at every real edge',
+    );
+    check(
+      await js(`document.querySelector('[data-action="undo"]').disabled`),
+      'Undo disabled while solution is displayed',
+    );
+  };
+  await checkRevealedGraph();
+  await click('[data-action="undo"]');
+  await checkRevealedGraph();
+  await command('Emulation.setDeviceMetricsOverride', {
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 1,
+    mobile: true,
+  });
+  await checkRevealedGraph();
+  await shot('color-revealed-mobile');
+  console.log(
+    'PASS displayed coloring: complete, valid, immutable under Undo, and mobile rendering',
+  );
   check(errors.length === 0, errors.join('\n'));
   console.log('PASS all UI scenarios; no JavaScript errors.');
 } catch (error) {
