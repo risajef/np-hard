@@ -42,3 +42,12 @@ Commit references: 1 `bb63a2b`; 2 `145ab92`. Later entries are identified by the
 9. This commit — `test: gate application regressions with isolated browser checks`.
 
 No parent files, published assets, or parent submodule-pointer commits are included. No commits have been pushed.
+
+## Follow-up: misleading coloring edges (9 November 2026)
+
+- Report: apparently adjacent green nodes on the advanced board, especially around displaying solutions. The screenshot does not include a readable seed, so its exact instance cannot be identified.
+- Reproduced a geometry defect across seeds 1, 7, 42, 137 and 2026: long animated edges run underneath unrelated node circles. Crossing checks skip edges sharing endpoints and do not enforce node-to-edge clearance. This creates apparent connections that are absent from the graph; the checked solver outputs remain valid.
+- Fixed planar motion checks in both directions: moving a node toward an unrelated edge and moving an incident edge toward another node. The 24 px clearance leaves space outside the 19 px node radius; graph adjacency and solution colors are unchanged.
+- Regression coverage: shared-endpoint and drag cases, plus six advanced seed/difficulty combinations through initial layout and 300 animation frames. Tests verify edge clearance and valid solution coloring.
+- Validation with the companion reveal/Undo fix: all 54 Node tests, production build, formatting and isolated Chromium browser suite passed. Phone-width solution screenshot inspected locally.
+- Commit: `fix: keep coloring edges clear of unrelated nodes`. Subrepo only; no main-site update or push.

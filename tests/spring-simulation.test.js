@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SpringSimulation, segmentsIntersect } from '../src/core/spring-simulation.js';
+import {
+  SpringSimulation,
+  segmentsIntersect,
+  pointSegmentDistance,
+  EDGE_CLEARANCE,
+} from '../src/core/spring-simulation.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -115,4 +120,72 @@ test('dragging respects node spacing and board boundaries', () => {
   assert.ok(
     simulation.positions.every((point) => Number.isFinite(point.x) && Number.isFinite(point.y)),
   );
+});
+
+test('planar dragging keeps unrelated nodes clear of edges, including shared-endpoint edges', () => {
+  const simulation = new SpringSimulation(
+    [
+      { x: 100, y: 100 },
+      { x: 400, y: 100 },
+      { x: 250, y: 200 },
+    ],
+    [
+      [0, 1],
+      [0, 2],
+    ],
+    { planar: true },
+  );
+  assert.equal(
+    simulation.canMove(2, { x: 250, y: 110 }),
+    false,
+    'node cannot hide a nonincident edge',
+  );
+  assert.equal(
+    simulation.canMove(1, { x: 400, y: 300 }),
+    false,
+    'moving edge cannot pass through its nonincident node',
+  );
+  simulation.pin(2);
+  simulation.movePinned({ x: 250, y: 50 });
+  assert.ok(
+    pointSegmentDistance(
+      simulation.positions[2],
+      simulation.positions[0],
+      simulation.positions[1],
+    ) >= EDGE_CLEARANCE,
+  );
+});
+
+test('advanced coloring stays visually unambiguous throughout long animation', async () => {
+  const { generate, evaluate } = await import('../src/engine.js');
+  for (const difficulty of [2, 3])
+    for (const seed of [1, 7, 42]) {
+      const puzzle = generate('color', seed, difficulty);
+      const simulation = new SpringSimulation(puzzle.points, puzzle.edges, {
+        ...puzzle.board,
+        planar: true,
+      });
+      const assertClear = () => {
+        for (const [a, b] of puzzle.edges)
+          for (let other = 0; other < puzzle.points.length; other++) {
+            if (other === a || other === b) continue;
+            assert.ok(
+              pointSegmentDistance(
+                simulation.positions[other],
+                simulation.positions[a],
+                simulation.positions[b],
+              ) >=
+                EDGE_CLEARANCE - 1e-6,
+              `${seed}/${difficulty}: node ${other} obscures edge ${a}-${b}`,
+            );
+          }
+        assert.equal(evaluate(puzzle, puzzle.solution).optimal, true);
+      };
+      assertClear();
+      for (let frame = 0; frame < 300; frame++) {
+        simulation.step();
+        if (frame % 50 === 0) assertClear();
+      }
+      assertClear();
+    }
 });

@@ -1,6 +1,20 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const orientation = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
 
+/** Distance to the finite edge, including its endpoints. */
+export function pointSegmentDistance(point, a, b) {
+  const dx = b.x - a.x,
+    dy = b.y - a.y;
+  const lengthSquared = dx * dx + dy * dy;
+  const t = lengthSquared
+    ? clamp(((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSquared, 0, 1)
+    : 0;
+  return Math.hypot(point.x - a.x - t * dx, point.y - a.y - t * dy);
+}
+
+// Nodes have radius 19: leave visible space around unrelated edges.
+export const EDGE_CLEARANCE = 24;
+
 function onSegment(point, a, b) {
   return (
     Math.abs(orientation(a, b, point)) < 1e-6 &&
@@ -133,6 +147,17 @@ export class SpringSimulation {
       return false;
     if (!this.planar) return true;
     const point = (i) => (i === index ? candidate : this.positions[i]);
+    // Crossing tests alone miss an edge hidden underneath a third node, and
+    // overlapping edges that share an endpoint. Check both kinds of motion:
+    // the node approaching a fixed edge, and its edges approaching other nodes.
+    for (const [a, b] of this.edges) {
+      if (a === index || b === index) {
+        for (let other = 0; other < this.positions.length; other++) {
+          if (other === a || other === b) continue;
+          if (pointSegmentDistance(point(other), point(a), point(b)) < EDGE_CLEARANCE) return false;
+        }
+      } else if (pointSegmentDistance(candidate, point(a), point(b)) < EDGE_CLEARANCE) return false;
+    }
     for (const [a, b] of this.incident[index]) {
       for (const [c, d] of this.edges) {
         if (a === c || a === d || b === c || b === d) continue;
