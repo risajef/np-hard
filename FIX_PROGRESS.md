@@ -60,3 +60,9 @@ No parent files, published assets, or parent submodule-pointer commits are inclu
 - Validation: 54 Node tests passed; production build, formatting, diff checks and full isolated Chromium suite passed with no JavaScript errors. The mobile screenshot shows a complete revealed coloring and disabled Undo.
 - Commit: `fix: preserve displayed solutions when Undo is attempted`. Layout companion commit: `044876e`.
 - Both fixes remain local to this subrepo. The deployed website has not been updated; no parent pointer commit or push was made.
+
+## CI follow-up: Node 22 test runner (9 November 2026)
+
+- The first hosted check failed because Node 22 does not recognize `--test-isolation=none`.
+- Removed that optional flag from `npm test`; the standard test runner works across the supported Node versions and isolates test files by default.
+- Validation: all 10 test files pass on Node 22.21.1 and Node 26.5.0; `npm run format:check` and `npm run build` pass. Hosted verification follows the push.
